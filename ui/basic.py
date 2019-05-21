@@ -121,10 +121,11 @@ class Ui_MainWidget(object):
 
         #self.centralwidget.adjustSize()
 
-app = QtWidgets.QApplication(sys.argv)
-MainWidget = QtWidgets.QWidget()
-winSize = QtCore.QSize(app.primaryScreen().geometry().width(),app.primaryScreen().geometry().height())
-ui = Ui_MainWidget()
-ui.setupUi(MainWidget,winSize)
-MainWidget.showMaximized()
-sys.exit(app.exec_())
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    winSize = QtCore.QSize(app.primaryScreen().geometry().width(),app.primaryScreen().geometry().height())
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget,winSize)
+    MainWidget.showMaximized()
+    sys.exit(app.exec_())

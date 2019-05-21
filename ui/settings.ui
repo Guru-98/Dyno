@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsDialog</class>
+ <widget class="QDialog" name="SettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>174</width>
+    <height>277</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>174</width>
+    <height>277</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>174</width>
+    <height>277</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Settings</string>
+  </property>
+  <widget class="QDialogButtonBox" name="buttonBox">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>245</y>
+     <width>151</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>151</width>
+     <height>230</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="settingsList">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMaximumSize</enum>
+    </property>
+    <item row="0" column="0">
+     <widget class="QLabel" name="dc1Label">
+      <property name="text">
+       <string>DC1</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QComboBox" name="dC1ComboBox"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="dC2Label">
+      <property name="text">
+       <string>DC2</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="dC2ComboBox"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="dC3Label">
+      <property name="text">
+       <string>DC3</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="dC3ComboBox"/>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="dC4Label">
+      <property name="text">
+       <string>DC4</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QComboBox" name="dC4ComboBox"/>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="dC5Label">
+      <property name="text">
+       <string>DC5</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QComboBox" name="dC5ComboBox"/>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="rpmLabel">
+      <property name="text">
+       <string>RPM</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QComboBox" name="rpmComboBox"/>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="torqueLabel">
+      <property name="text">
+       <string>Torque</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QComboBox" name="torqueComboBox"/>
+    </item>
+    <item row="7" column="0">
+     <widget class="QLabel" name="VFDLabel">
+      <property name="text">
+       <string>VFD</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="1">
+     <widget class="QComboBox" name="VFDComboBox"/>
+    </item>
+    <item row="8" column="0">
+     <widget class="QLabel" name="temperatureLabel">
+      <property name="text">
+       <string>Temperature</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="1">
+     <widget class="QComboBox" name="temperatureComboBox"/>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>256</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>86</x>
+     <y>138</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>84</x>
+     <y>256</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>86</x>
+     <y>138</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
