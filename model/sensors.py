@@ -1,10 +1,9 @@
 from serial import Serial, SerialException
-from sensors import Sensor
 
-class vfd(Sensor):
+class Sensor():
     def __init__(self, port= None):
-        pass
-    
+        self.serial = port
+
     def checkcomm(self):
         pass
 
