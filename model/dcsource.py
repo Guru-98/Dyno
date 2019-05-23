@@ -4,6 +4,7 @@ from sensors import Sensor
 class dcSource(Sensor):
     def __init__(self, port= None):
         self.serial = Serial(port, baudrate=9600, timeout=2)
+        self.putdata("SYST:ETR")
     
     def checkcomm(self):
         self.putdata("*IDN?")
@@ -14,6 +15,12 @@ class dcSource(Sensor):
         else:
             return False
     
+    def turnON(self):
+        self.putdata("OUTP 1")
+
+    def turnOFF(self):
+        self.putdata("OUTP 0")
+
     def setVoltage(self,volt):
         self.putdata("VOLT %s"%(str(volt)))
     
@@ -25,6 +32,11 @@ class dcSource(Sensor):
 
     def measCurr(self):
         return self.getdata("MEAS:CURR?")
+
+    def close(self):
+        self.turnOFF()
+        self.putdata("SYST:LOC")
+        self.serial.close()
 
 
 if __name__ == "__main__":
