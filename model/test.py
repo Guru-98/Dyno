@@ -1,9 +1,13 @@
 from vfd import vfd
 from dcsource import dcSource
-import logging
+from serial.tools import list_ports
 
 if __name__ == "__main__":
-    d = dcSource('COM7')
+    ports = [port.device for port in list_ports.comports()]
+    dc = list(filter(dcSource.checkcomm,ports))
+    print(dc)
+    input(">> ")
+    dc = [dcSource(port) for port in dc]
     m = vfd('COM6')
     while True:
         data = input('>> ')
@@ -20,15 +24,15 @@ if __name__ == "__main__":
             m.setSpeed(freq)
         elif(data.find('d.volt ') != -1):
             volt = int(data[data.find(' ')+1:])
-            d.setVoltage(48)
+            [d.setVoltage(48) for d in dc]
         elif (data.find('d.curr ') != -1):
             curr = int(data[data.find(' ')+1:])
-            d.setCurrent(curr)
+            [d.setCurrent(curr) for d in dc]
         elif (data.find('d.on') != -1):
-            d.turnON()
+            [d.turnON() for d in dc]
         elif (data.find('d.off') != -1):
-            d.turnOFF()
+            [d.turnOFF for d in dc]
         elif(data == 'close'):
             m.close()
-            d.close()
+            [d.close() for d in dc]
             break

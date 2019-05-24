@@ -2,11 +2,13 @@ from serial import Serial, SerialException
 from sensors import Sensor
 
 class dcSource(Sensor):
-    def __init__(self, port= None):
+    def __init__(self, port):
         self.serial = Serial(port, baudrate=9600, timeout=2)
         self.putdata("SYST:ETR")
     
-    def checkcomm(self):
+    def checkcomm(self,port=None):
+        if port is not None:
+            self.__init__(port)
         self.putdata("*IDN?")
         data = self.getdata()
         print(data)
@@ -38,11 +40,11 @@ class dcSource(Sensor):
         self.putdata("SYST:LOC")
         self.serial.close()
 
-
 if __name__ == "__main__":
     from serial.tools import list_ports
 
     ports = [(port.device,port) for port in list_ports.comports()]
+    dc = list(filter(dcSource.checkcomm,ports))
     ports.sort(key=lambda x: int(x[0].split("COM")[1]))
     for port in ports:
         # print("testing on %s"%(port[0]))

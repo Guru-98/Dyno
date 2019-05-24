@@ -20,7 +20,7 @@ class vfd(Sensor):
         if(dir == 0):
             self.putdata(0x01,1)
         elif(dir == 1):
-            self.putdata(0x01,3)
+            self.putdata(0x01,2)
     
     def stop(self):
         self.putdata(0x01,0)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
             m.setTorq(torq)
         elif(data.find('freq ') != -1):
             freq = int(data[data.find(' ')+1:])
-            print(freq)
+            m.setSpeed(freq)
         elif(data == 'close'):
             m.close()
             break
