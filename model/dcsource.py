@@ -1,5 +1,5 @@
 from serial import Serial, SerialException
-from sensors import Sensor
+from model.sensors import Sensor
 
 class dcSource(Sensor):
     def __init__(self, port):

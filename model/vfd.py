@@ -1,5 +1,5 @@
 from serial import Serial, SerialException, PARITY_EVEN
-from sensors import Sensor
+from model.sensors import Sensor
 from pymodbus.client.sync import ModbusSerialClient as ModBusClient
 
 class vfd(Sensor):

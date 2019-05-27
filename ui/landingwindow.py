@@ -17,8 +17,7 @@ class dynoLanding(QtWidgets.QMainWindow, Ui_dynoLandingWindow):
     
     def showSettingsDialog(self):
         dialog = settingsDialog(self)
-        res = dialog.exec()
-        print(res)
+        dialog.exec()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
