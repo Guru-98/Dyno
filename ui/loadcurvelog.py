@@ -1,17 +1,25 @@
 import sys
 from PyQt5 import QtCore, QtWidgets, QtOpenGL, uic
-# from model.dcsource import dcSource
+from model.dcsource import dcSource
 # from model.vfd import vfd
 # from model.oscilloscope import oscilloscope
-# from model import devices
+from model import devices
 
 class dashLoadCurveLog(QtWidgets.QWidget):
     def __init__(self,parent=None):
-        self.dataRowsNo = 0
+        self.dataRowsNo = 1
         super(dashLoadCurveLog,self).__init__(parent)
 
         self.container = QtWidgets.QVBoxLayout(self)
 
+        self.motor_data = QtWidgets.QGroupBox(self)
+        self.motor_data.setTitle("Motor Parameters")
+        self.motor_data_layout = QtWidgets.QHBoxLayout()
+        self.motor_data_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.motor_data_layout.setAlignment(QtCore.Qt.AlignCenter)
+        self.motor_data_layout.setSpacing(50)
+        self.motor_data.setLayout(self.motor_data_layout)
+        
         self.motorID_container = QtWidgets.QHBoxLayout()
         self.motorID_lab = QtWidgets.QLabel(self)
         self.motorID_lab.setText("Motor &ID")
@@ -20,19 +28,32 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.motorID_container.addWidget(self.motorID_lab,alignment=QtCore.Qt.AlignRight)
         self.motorID_container.addWidget(self.motorID    ,alignment=QtCore.Qt.AlignLeft)
         self.motorID_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-        # self.motorID_container.setAlignment(self.motorID,QtCore.Qt.AlignHCenter)
-        # self.motorID_container.setAlignment(self.motorID_l,QtCore.Qt.AlignHCenter)
-        self.container.addLayout(self.motorID_container,0)
+        self.motor_data_layout.addLayout(self.motorID_container)
 
-        # spacer = QtOpenGL.QGLWidget(self)
-        # self.container.addWidget(spacer,alignment=QtCore.Qt.AlignHCenter)
+        self.motorT_container = QtWidgets.QHBoxLayout()
+        self.motorT_lab = QtWidgets.QLabel(self)
+        self.motorT_lab.setText("Rate &Torque")
+        self.motorT = QtWidgets.QLineEdit(self)
+        self.motorT_lab.setBuddy(self.motorID)
+        self.motorT_container.addWidget(self.motorT_lab,alignment=QtCore.Qt.AlignRight)
+        self.motorT_container.addWidget(self.motorT    ,alignment=QtCore.Qt.AlignLeft)
+        self.motorT_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.motor_data_layout.addLayout(self.motorT_container)
+
+        self.container.addWidget(self.motor_data,0)
+
+        spacer = QtOpenGL.QGLWidget(self)
+        self.container.addWidget(spacer,alignment=QtCore.Qt.AlignHCenter)
+        self.container.addSpacerItem(QtWidgets.QSpacerItem(1,30,QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.Maximum))
 
         self.layout = QtWidgets.QGridLayout()
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.layout.setAlignment(QtCore.Qt.AlignCenter)
         self.container.addLayout(self.layout,0)
 
         self.loadHeader()
         self.dataTable = QtWidgets.QVBoxLayout()
-        self.layout.addLayout(self.dataTable,2,0,1,11,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addLayout(self.dataTable,2,0,1,12,alignment=QtCore.Qt.AlignHCenter)
 
         actions = QtWidgets.QHBoxLayout()
         self.addRowbtn = QtWidgets.QPushButton(self)
@@ -45,13 +66,10 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.runAllbtn.clicked.connect(self.runAll)
         actions.addWidget(self.runAllbtn,alignment=QtCore.Qt.AlignHCenter)
 
+        self.container.addSpacerItem(QtWidgets.QSpacerItem(1,1,QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.MinimumExpanding))
         self.container.addLayout(actions,0)
 
         [self.addRowbtn.click() for _ in range(4)]
-        
-        # self.dcS = [(port) for port in devices.dcS]
-        # self.vfd = vfd(devices.vfd)
-        # self.osc = oscilloscope(devices.osc)
 
     def loadHeader(self):
         load_l = QtWidgets.QLabel(self)
@@ -72,46 +90,52 @@ class dashLoadCurveLog(QtWidgets.QWidget):
 
         cont_v_ip_l = QtWidgets.QLabel(self)
         cont_v_ip_l.setText("Voltage i/p")
-        self.layout.addWidget(cont_v_ip_l,1,1,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_v_ip_l,1,1)
 
         cont_i_ip_l = QtWidgets.QLabel(self)
         cont_i_ip_l.setText("Current i/p")
-        self.layout.addWidget(cont_i_ip_l,1,2,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_i_ip_l,1,2)
 
         cont_p_ip_l = QtWidgets.QLabel(self)
         cont_p_ip_l.setText("Power i/p")
-        self.layout.addWidget(cont_p_ip_l,1,3,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_p_ip_l,1,3)
 
         cont_v_op_l = QtWidgets.QLabel(self)
         cont_v_op_l.setText("Voltage o/p")
-        self.layout.addWidget(cont_v_op_l,1,4,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_v_op_l,1,4)
 
         cont_i_op_l = QtWidgets.QLabel(self)
         cont_i_op_l.setText("Current o/p")
-        self.layout.addWidget(cont_i_op_l,1,5,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_i_op_l,1,5)
 
         cont_p_op_l = QtWidgets.QLabel(self)
         cont_p_op_l.setText("Power o/p")
-        self.layout.addWidget(cont_p_op_l,1,6,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_p_op_l,1,6)
 
         motor_rpm_l = QtWidgets.QLabel(self)
         motor_rpm_l.setText("Motor RPM")
-        self.layout.addWidget(motor_rpm_l,1,7,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(motor_rpm_l,1,7)
 
         motor_tor_l = QtWidgets.QLabel(self)
         motor_tor_l.setText("Motor Torque")
-        self.layout.addWidget(motor_tor_l,1,8,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(motor_tor_l,1,8)
 
         motor_pow_l = QtWidgets.QLabel(self)
         motor_pow_l.setText("Motor Power")
-        self.layout.addWidget(motor_pow_l,1,9,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(motor_pow_l,1,9)
+
+        run_l = QtWidgets.QLabel(self)
+        run_l.setText("Run")
+        self.layout.addWidget(run_l,1,10)
+
+        del_l = QtWidgets.QLabel(self)
+        del_l.setText("Del")
+        self.layout.addWidget(del_l,1,11)
 
     def addLoadRow(self):
         if self.dataRowsNo <= 8:
             row = loadRow(self)
-            container = QtWidgets.QVBoxLayout(self)
-            container.addWidget(row)
-            self.dataTable.addLayout(container)
+            self.dataTable.addWidget(row)
             if self.dataRowsNo == 8:
                 self.addRowbtn.setDisabled(True)
         self.dataRowsNo += 1
@@ -124,8 +148,10 @@ class loadRow(QtWidgets.QWidget):
         super(loadRow,self).__init__(parent)
         self.parent = parent
         self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
+        self.layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.load = QtWidgets.QLineEdit(self)
+        self.load      = QtWidgets.QLineEdit(self)
         self.load.setAlignment(QtCore.Qt.AlignHCenter)
         self.cont_v_ip = QtWidgets.QLineEdit(self)
         self.cont_v_ip.setAlignment(QtCore.Qt.AlignHCenter)
@@ -150,6 +176,10 @@ class loadRow(QtWidgets.QWidget):
         self.runbtn.setText(">")
         self.runbtn.clicked.connect(self.runRow)
 
+        self.delbtn = QtWidgets.QPushButton(self)
+        self.delbtn.setText("-")
+        self.delbtn.clicked.connect(self.delRow)
+
         self.layout.addWidget(self.load     ,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.cont_v_ip,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.cont_i_ip,alignment=QtCore.Qt.AlignHCenter)
@@ -161,22 +191,29 @@ class loadRow(QtWidgets.QWidget):
         self.layout.addWidget(self.motor_tor,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.motor_pow,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.runbtn,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.delbtn,alignment=QtCore.Qt.AlignHCenter)
 
     def runRow(self):
         self.runbtn.setStyleSheet("background: green")
-        # dcS:list(dcSource) = self.parent.dcS
-        # vfd:vfd = self.parent.vfd
-        # osc:oscilloscope = self.parent.osc
+        dcS = [dcSource(port) for port in devices.DCS]
+        # vfd = vfd(devices.vfd)
+        # osc = oscilloscope(devices.osc)
 
-        load = int(self.load.text())
+        s2i = lambda x: int(x) if x else 0
         
-        volt = int(self.cont_v_ip.text())
-        curr = int(self.cont_i_ip.text())
+        load = s2i(self.load.text())
+        volt = s2i(self.cont_v_ip.text())
+        curr = s2i(self.cont_i_ip.text())
         
-        # for dc in dcS:
-        #     dc.setVoltage(volt)
-        #     dc.setCurrent(curr/5)
-        #     dc.turnON()
+        for dc in dcS:
+            dc.setVoltage(volt)
+            dc.setCurrent(curr//5)
+            dc.turnON()
+
+    def delRow(self):
+        self.parent.dataRowsNo -= 1
+        self.parent.addRowbtn.setEnabled(True)
+        self.deleteLater()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

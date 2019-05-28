@@ -5,13 +5,13 @@ class dcSource(Sensor):
     def __init__(self, port):
         self.serial = Serial(port, baudrate=9600, timeout=2)
         self.putdata("SYST:ETR")
+        self.getdata()
+        self.setVoltage(0)
+        self.setVoltage(0)
     
     def checkcomm(self,port=None):
-        if port is not None:
-            self.__init__(port)
         self.putdata("*IDN?")
         data = self.getdata()
-        print(data)
         if data.find("APM") is not -1:
             return True
         else:
@@ -43,11 +43,10 @@ class dcSource(Sensor):
 if __name__ == "__main__":
     from serial.tools import list_ports
 
-    ports = [(port.device,port) for port in list_ports.comports()]
-    dc = list(filter(dcSource.checkcomm,ports))
-    ports.sort(key=lambda x: int(x[0].split("COM")[1]))
+    ports = [port.device for port in list_ports.comports()]
+    ports.sort(key=lambda x: int(x.split("COM")[1]))
     for port in ports:
-        # print("testing on %s"%(port[0]))
-        dc = dcSource(port[0])
+        # print("testing on %s"%(port))
+        dc = dcSource(port)
         if dc.checkcomm():
-            print(port[0])
+            print(port)

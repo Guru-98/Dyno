@@ -6,7 +6,18 @@
         {
             "label": "Run Python File",
             "type": "shell",
-            "command": "${python} ${file}"
+            "group": "build",
+            "command": "set PYTHONPATH=${workspaceRoot}; ${config:python.pythonPath} ${file}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Project",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "command": "${config:python.pythonPath} main.py"
         }
     ]
 }
