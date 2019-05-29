@@ -40,6 +40,9 @@ class dcSource(Sensor):
         self.putdata("SYST:LOC")
         self.serial.close()
 
+    def __del__(self):
+        self.close()
+
 if __name__ == "__main__":
     from serial.tools import list_ports
 

@@ -7,7 +7,7 @@
             "label": "Run Python File",
             "type": "shell",
             "group": "build",
-            "command": "set PYTHONPATH=${workspaceRoot}; ${config:python.pythonPath} ${file}",
+            "command": "set PYTHONPATH=${workspaceRoot} && ${config:python.pythonPath} ${file}",
             "problemMatcher": []
         },
         {

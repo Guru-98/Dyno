@@ -210,6 +210,8 @@ class loadRow(QtWidgets.QWidget):
             dc.setCurrent(curr//5)
             dc.turnON()
 
+        del(dcS)
+
     def delRow(self):
         self.parent.dataRowsNo -= 1
         self.parent.addRowbtn.setEnabled(True)

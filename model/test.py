@@ -1,4 +1,4 @@
-# from vfd import vfd
+from model.vfd import vfd
 from model.dcsource import dcSource
 import model.devices as devices
 from serial.tools import list_ports
@@ -6,7 +6,7 @@ from serial.tools import list_ports
 if __name__ == "__main__":
     print(devices.DCS)
     dc = [dcSource(port) for port in devices.DCS]
-    m = ''
+    m = vfd(devices.VFD)
     input(">> ")
     while True:
         data = input('>> ')
