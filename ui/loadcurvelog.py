@@ -1,9 +1,9 @@
 import sys
 from PyQt5 import QtCore, QtWidgets, QtOpenGL, uic
 from model.dcsource import dcSource
-# from model.vfd import vfd
-# from model.oscilloscope import oscilloscope
-from model import devices
+from model.vfd import vfd
+from model.oscilloscope import oscilloscope
+import model.devices as devices
 
 class dashLoadCurveLog(QtWidgets.QWidget):
     def __init__(self,parent=None):
@@ -32,15 +32,60 @@ class dashLoadCurveLog(QtWidgets.QWidget):
 
         self.motorT_container = QtWidgets.QHBoxLayout()
         self.motorT_lab = QtWidgets.QLabel(self)
-        self.motorT_lab.setText("Rate &Torque")
+        self.motorT_lab.setText("Rated &Torque")
         self.motorT = QtWidgets.QLineEdit(self)
-        self.motorT_lab.setBuddy(self.motorID)
+        self.motorT_lab.setBuddy(self.motorT)
         self.motorT_container.addWidget(self.motorT_lab,alignment=QtCore.Qt.AlignRight)
         self.motorT_container.addWidget(self.motorT    ,alignment=QtCore.Qt.AlignLeft)
         self.motorT_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.motor_data_layout.addLayout(self.motorT_container)
 
+        self.motorN_container = QtWidgets.QHBoxLayout()
+        self.motorN_lab = QtWidgets.QLabel(self)
+        self.motorN_lab.setText("Rated S&peed")
+        self.motorN = QtWidgets.QLineEdit(self)
+        self.motorN_lab.setBuddy(self.motorN)
+        self.motorN_container.addWidget(self.motorN_lab,alignment=QtCore.Qt.AlignRight)
+        self.motorN_container.addWidget(self.motorN    ,alignment=QtCore.Qt.AlignLeft)
+        self.motorN_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.motor_data_layout.addLayout(self.motorN_container)
+
+        self.motorV_container = QtWidgets.QHBoxLayout()
+        self.motorV_lab = QtWidgets.QLabel(self)
+        self.motorV_lab.setText("Rated &Voltage")
+        self.motorV = QtWidgets.QLineEdit(self)
+        self.motorV_lab.setBuddy(self.motorV)
+        self.motorV_container.addWidget(self.motorV_lab,alignment=QtCore.Qt.AlignRight)
+        self.motorV_container.addWidget(self.motorV    ,alignment=QtCore.Qt.AlignLeft)
+        self.motorV_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.motor_data_layout.addLayout(self.motorV_container)
+
+        self.motorI_container = QtWidgets.QHBoxLayout()
+        self.motorI_lab = QtWidgets.QLabel(self)
+        self.motorI_lab.setText("Max &Current")
+        self.motorI = QtWidgets.QLineEdit(self)
+        self.motorI_lab.setBuddy(self.motorI)
+        self.motorI_container.addWidget(self.motorI_lab,alignment=QtCore.Qt.AlignRight)
+        self.motorI_container.addWidget(self.motorI    ,alignment=QtCore.Qt.AlignLeft)
+        self.motorI_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.motor_data_layout.addLayout(self.motorI_container)
+
+        self.control_container = QtWidgets.QGroupBox()
+        self.control_lab = QtWidgets.QLabel(self)
+        self.control_lab.setText("Mode")
+        self.controlT = QtWidgets.QRadioButton(self)
+        self.controlT.setText("Torque")
+        self.controlN = QtWidgets.QRadioButton(self)
+        self.controlN.setText("Speed")
+        self.control_container.addWidget(self.control_lab,alignment=QtCore.Qt.AlignRight)
+        self.control_container.addWidget(self.controlT    ,alignment=QtCore.Qt.AlignLeft)
+        self.control_container.addWidget(self.controlN    ,alignment=QtCore.Qt.AlignLeft)
+        self.controlT_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.motor_data_layout.addLayout(self.control_container)
+
         self.container.addWidget(self.motor_data,0)
+        
+        #===========================================================#
 
         spacer = QtOpenGL.QGLWidget(self)
         self.container.addWidget(spacer,alignment=QtCore.Qt.AlignHCenter)
@@ -70,6 +115,10 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.container.addLayout(actions,0)
 
         [self.addRowbtn.click() for _ in range(4)]
+
+        self.dcS = [dcSource(port) for port in devices.DCS]
+        self.vfd = vfd(devices.VFD)
+        self.osc = oscilloscope(devices.OSC)
 
     def loadHeader(self):
         load_l = QtWidgets.QLabel(self)
@@ -193,25 +242,42 @@ class loadRow(QtWidgets.QWidget):
         self.layout.addWidget(self.runbtn,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.delbtn,alignment=QtCore.Qt.AlignHCenter)
 
+        self.running = False
+
     def runRow(self):
-        self.runbtn.setStyleSheet("background: green")
-        dcS = [dcSource(port) for port in devices.DCS]
-        # vfd = vfd(devices.vfd)
-        # osc = oscilloscope(devices.osc)
-
-        s2i = lambda x: int(x) if x else 0
+        if self.running == False:
+            self.running = True
+            self.runbtn.setStyleSheet("background: green")
         
-        load = s2i(self.load.text())
-        volt = s2i(self.cont_v_ip.text())
-        curr = s2i(self.cont_i_ip.text())
-        
-        for dc in dcS:
-            dc.setVoltage(volt)
-            dc.setCurrent(curr//5)
-            dc.turnON()
+            s2i = lambda x: int(x) if x else 0
+            s2f = lambda x: float(x) if x else 0
 
-        del(dcS)
+            f2s = lambda x: int(('%0.2f'%(x)).replace('.',''))
+            f2t = lambda x: int(('%0.1f'%(x)).replace('.',''))
+            
+            maxT = s2i(self.parent.motorT.text())
+            maxT = f2t(maxT)
+            load = s2i(self.parent.motorN.text()) / 30 * s2f(self.load.text()) / 100
+            load = f2s(load)
 
+            volt = s2i(self.parent.motorV.text())
+            curr = s2i(self.parent.motorI.text())
+            
+            for dc in self.parent.dcS:
+                dc.setVoltage(volt)
+                dc.setCurrent(curr//5)
+                dc.turnON()
+            
+            self.parent.vfd.setTorq(maxT)
+            self.parent.vfd.setSpeed(load)
+            self.parent.vfd.run(1)
+        else:
+            self.running = False
+            self.runbtn.setStyleSheet("background: none")
+            for dc in self.parent.dcS:
+                dc.turnOFF()
+            
+            self.parent.vfd.stop()
     def delRow(self):
         self.parent.dataRowsNo -= 1
         self.parent.addRowbtn.setEnabled(True)

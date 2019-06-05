@@ -8,6 +8,14 @@
             "type": "shell",
             "group": "build",
             "command": "set PYTHONPATH=${workspaceRoot} && ${config:python.pythonPath} ${file}",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            },
             "problemMatcher": []
         },
         {
@@ -17,7 +25,34 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "command": "${config:python.pythonPath} main.py"
+            "command": "${config:python.pythonPath} main.py",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Project (Test)",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "command": "${config:python.pythonPath} test.py",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "problemMatcher": []
         }
     ]
 }

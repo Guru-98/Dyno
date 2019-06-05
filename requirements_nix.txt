@@ -1,3 +1,5 @@
-pkg-resources==0.0.0
-PyQt5==5.12.1
-PyQt5-sip==4.19.15
+pymodbus==2.2.0
+PyQt5==5.12.2
+PyQt5-sip==4.19.17
+pyserial==3.4
+six==1.11.0

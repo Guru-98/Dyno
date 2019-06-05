@@ -3,7 +3,8 @@ from model.sensors import Sensor
 
 class oscilloscope(Sensor):
     def __init__(self, port= None):
-        self.serial = Serial(port, baudrate=19200,timeout=2)
+        self.port = port
+        super(oscilloscope,self).__init__(port)
     
     def checkcomm(self):
         self.putdata("*IDN?")
