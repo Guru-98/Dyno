@@ -11,11 +11,12 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         super(dashLoadCurveLog,self).__init__(parent)
 
         self.container = QtWidgets.QVBoxLayout(self)
+        self.container.setContentsMargins(0, 0, 0, 0)
 
         self.motor_data = QtWidgets.QGroupBox(self)
         self.motor_data.setTitle("Motor Parameters")
         self.motor_data_layout = QtWidgets.QHBoxLayout()
-        self.motor_data_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.motor_data_layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
         self.motor_data_layout.setAlignment(QtCore.Qt.AlignCenter)
         self.motor_data_layout.setSpacing(50)
         self.motor_data.setLayout(self.motor_data_layout)
@@ -70,20 +71,48 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.motorI_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.motor_data_layout.addLayout(self.motorI_container)
 
-        self.control_container = QtWidgets.QGroupBox()
-        self.control_lab = QtWidgets.QLabel(self)
-        self.control_lab.setText("Mode")
+        self.vfd_data = QtWidgets.QGroupBox(self)
+        self.vfd_data.setTitle("VFD Parameters")
+        self.vfd_data_layout = QtWidgets.QHBoxLayout()
+        self.vfd_data_layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        self.vfd_data_layout.setAlignment(QtCore.Qt.AlignCenter)
+        self.vfd_data_layout.setSpacing(50)
+        self.vfd_data.setLayout(self.vfd_data_layout)
+
+        self.control_container = QtWidgets.QGroupBox(self)
+        self.control_container.setTitle("Mode")
+        self.control_container_layout = QtWidgets.QHBoxLayout()
+        self.control_container_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.control_container_layout.setAlignment(QtCore.Qt.AlignCenter)
+        self.control_container_layout.setSpacing(20)
+        self.control_container.setLayout(self.control_container_layout)
         self.controlT = QtWidgets.QRadioButton(self)
         self.controlT.setText("Torque")
         self.controlN = QtWidgets.QRadioButton(self)
         self.controlN.setText("Speed")
-        self.control_container.addWidget(self.control_lab,alignment=QtCore.Qt.AlignRight)
-        self.control_container.addWidget(self.controlT    ,alignment=QtCore.Qt.AlignLeft)
-        self.control_container.addWidget(self.controlN    ,alignment=QtCore.Qt.AlignLeft)
-        self.controlT_container.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
-        self.motor_data_layout.addLayout(self.control_container)
+        self.controlN.setChecked(True)
+        self.control_container_layout.addWidget(self.controlT   ,alignment=QtCore.Qt.AlignLeft)
+        self.control_container_layout.addWidget(self.controlN   ,alignment=QtCore.Qt.AlignLeft)
+        self.vfd_data_layout.addWidget(self.control_container)
+
+        self.direction_container = QtWidgets.QGroupBox(self)
+        self.direction_container.setTitle("Direction")
+        self.direction_container_layout = QtWidgets.QHBoxLayout()
+        self.direction_container_layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
+        self.direction_container_layout.setAlignment(QtCore.Qt.AlignCenter)
+        self.direction_container_layout.setSpacing(20)
+        self.direction_container.setLayout(self.direction_container_layout)
+        self.directionCW = QtWidgets.QRadioButton(self)
+        self.directionCW.setText("Clockwise")
+        self.directionCCW = QtWidgets.QRadioButton(self)
+        self.directionCCW.setText("Anti-Clockwise")
+        # self.directionCCW.setChecked(True)
+        self.direction_container_layout.addWidget(self.directionCW  ,alignment=QtCore.Qt.AlignLeft)
+        self.direction_container_layout.addWidget(self.directionCCW ,alignment=QtCore.Qt.AlignLeft)
+        self.vfd_data_layout.addWidget(self.direction_container)
 
         self.container.addWidget(self.motor_data,0)
+        self.container.addWidget(self.vfd_data,0)
         
         #===========================================================#
 
@@ -92,13 +121,30 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.container.addSpacerItem(QtWidgets.QSpacerItem(1,30,QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.Maximum))
 
         self.layout = QtWidgets.QGridLayout()
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        self.layout.setAlignment(QtCore.Qt.AlignCenter)
+        # self.layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        # self.layout.setStr(QtWidgets.QLayout.SetMaximumSize)
+        # self.layout.setAlignment(QtCore.Qt.AlignCenter)
+        self.layout.setColumnStretch(0,2)
+        self.layout.setColumnStretch(1,4)
+        self.layout.setColumnStretch(2,4)
+        self.layout.setColumnStretch(3,4)
+        self.layout.setColumnStretch(4,4)
+        self.layout.setColumnStretch(5,4)
+        self.layout.setColumnStretch(6,4)
+        self.layout.setColumnStretch(7,4)
+        self.layout.setColumnStretch(8,4)
+        self.layout.setColumnStretch(9,4)
+        self.layout.setColumnStretch(10,4)
+        self.layout.setColumnStretch(11,3)
+        self.layout.setColumnStretch(12,3)
         self.container.addLayout(self.layout,0)
 
         self.loadHeader()
         self.dataTable = QtWidgets.QVBoxLayout()
-        self.layout.addLayout(self.dataTable,2,0,1,12,alignment=QtCore.Qt.AlignHCenter)
+        self.dataTable.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
+        self.dataTable.setAlignment(QtCore.Qt.AlignCenter)
+        # self.layout.addLayout(self.dataTable,2,0,1,12,alignment=QtCore.Qt.AlignHCenter)
+        self.container.addLayout(self.dataTable,0)
 
         actions = QtWidgets.QHBoxLayout()
         self.addRowbtn = QtWidgets.QPushButton(self)
@@ -123,63 +169,63 @@ class dashLoadCurveLog(QtWidgets.QWidget):
     def loadHeader(self):
         load_l = QtWidgets.QLabel(self)
         load_l.setText("Load %")
-        self.layout.addWidget(load_l,0,0,2,1,alignment=QtCore.Qt.AlignCenter)
+        self.layout.addWidget(load_l,0,0,2,2,alignment=QtCore.Qt.AlignCenter)
 
         con_ip_l = QtWidgets.QLabel(self)
         con_ip_l.setText("Controller i/p")
-        self.layout.addWidget(con_ip_l,0,1,1,3,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(con_ip_l,0,2,1,3,alignment=QtCore.Qt.AlignHCenter)
 
         cont_op_l = QtWidgets.QLabel(self)
         cont_op_l.setText("Controller o/p")
-        self.layout.addWidget(cont_op_l,0,4,1,3,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(cont_op_l,0,5,1,3,alignment=QtCore.Qt.AlignHCenter)
 
         motor_op_l = QtWidgets.QLabel(self)
         motor_op_l.setText("Motor o/p")
-        self.layout.addWidget(motor_op_l,0,7,1,3,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(motor_op_l,0,8,1,3,alignment=QtCore.Qt.AlignHCenter)
 
         cont_v_ip_l = QtWidgets.QLabel(self)
         cont_v_ip_l.setText("Voltage i/p")
-        self.layout.addWidget(cont_v_ip_l,1,1)
+        self.layout.addWidget(cont_v_ip_l,1,2,alignment=QtCore.Qt.AlignHCenter)
 
         cont_i_ip_l = QtWidgets.QLabel(self)
         cont_i_ip_l.setText("Current i/p")
-        self.layout.addWidget(cont_i_ip_l,1,2)
+        self.layout.addWidget(cont_i_ip_l,1,3,alignment=QtCore.Qt.AlignHCenter)
 
         cont_p_ip_l = QtWidgets.QLabel(self)
         cont_p_ip_l.setText("Power i/p")
-        self.layout.addWidget(cont_p_ip_l,1,3)
+        self.layout.addWidget(cont_p_ip_l,1,4,alignment=QtCore.Qt.AlignHCenter)
 
         cont_v_op_l = QtWidgets.QLabel(self)
         cont_v_op_l.setText("Voltage o/p")
-        self.layout.addWidget(cont_v_op_l,1,4)
+        self.layout.addWidget(cont_v_op_l,1,5,alignment=QtCore.Qt.AlignHCenter)
 
         cont_i_op_l = QtWidgets.QLabel(self)
         cont_i_op_l.setText("Current o/p")
-        self.layout.addWidget(cont_i_op_l,1,5)
+        self.layout.addWidget(cont_i_op_l,1,6,alignment=QtCore.Qt.AlignHCenter)
 
         cont_p_op_l = QtWidgets.QLabel(self)
         cont_p_op_l.setText("Power o/p")
-        self.layout.addWidget(cont_p_op_l,1,6)
+        self.layout.addWidget(cont_p_op_l,1,7,alignment=QtCore.Qt.AlignHCenter)
 
         motor_rpm_l = QtWidgets.QLabel(self)
         motor_rpm_l.setText("Motor RPM")
-        self.layout.addWidget(motor_rpm_l,1,7)
+        self.layout.addWidget(motor_rpm_l,1,8,alignment=QtCore.Qt.AlignHCenter)
 
         motor_tor_l = QtWidgets.QLabel(self)
         motor_tor_l.setText("Motor Torque")
-        self.layout.addWidget(motor_tor_l,1,8)
+        self.layout.addWidget(motor_tor_l,1,9,alignment=QtCore.Qt.AlignHCenter)
 
         motor_pow_l = QtWidgets.QLabel(self)
         motor_pow_l.setText("Motor Power")
-        self.layout.addWidget(motor_pow_l,1,9)
+        self.layout.addWidget(motor_pow_l,1,10,alignment=QtCore.Qt.AlignHCenter)
 
         run_l = QtWidgets.QLabel(self)
         run_l.setText("Run")
-        self.layout.addWidget(run_l,1,10)
+        self.layout.addWidget(run_l,1,11,alignment=QtCore.Qt.AlignHCenter)
 
         del_l = QtWidgets.QLabel(self)
         del_l.setText("Del")
-        self.layout.addWidget(del_l,1,11)
+        self.layout.addWidget(del_l,1,12,alignment=QtCore.Qt.AlignHCenter)
 
     def addLoadRow(self):
         if self.dataRowsNo <= 8:
@@ -196,12 +242,18 @@ class loadRow(QtWidgets.QWidget):
     def __init__(self,parent=None):
         super(loadRow,self).__init__(parent)
         self.parent = parent
+        # self.container = QtWidgets.QGroupBox(parent)
+        # self.container.setStyleSheet("background:black;")
         self.layout = QtWidgets.QHBoxLayout(self)
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
         self.layout.setAlignment(QtCore.Qt.AlignCenter)
+        # self.container.setLayout(self.layout)
 
         self.load      = QtWidgets.QLineEdit(self)
         self.load.setAlignment(QtCore.Qt.AlignHCenter)
+        self.loadtext  = QtWidgets.QLabel(self)
+        # self.loadtext.setAlignment(QtCore.Qt.AlignHCenter)
+        self.loadtext.setText('0000.00')
         self.cont_v_ip = QtWidgets.QLineEdit(self)
         self.cont_v_ip.setAlignment(QtCore.Qt.AlignHCenter)
         self.cont_i_ip = QtWidgets.QLineEdit(self)
@@ -230,6 +282,7 @@ class loadRow(QtWidgets.QWidget):
         self.delbtn.clicked.connect(self.delRow)
 
         self.layout.addWidget(self.load     ,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.loadtext ,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.cont_v_ip,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.cont_i_ip,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.cont_p_ip,alignment=QtCore.Qt.AlignHCenter)
@@ -240,7 +293,7 @@ class loadRow(QtWidgets.QWidget):
         self.layout.addWidget(self.motor_tor,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.motor_pow,alignment=QtCore.Qt.AlignHCenter)
         self.layout.addWidget(self.runbtn,alignment=QtCore.Qt.AlignHCenter)
-        self.layout.addWidget(self.delbtn,alignment=QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.delbtn,alignment=QtCore.Qt.AlignLeft)
 
         self.running = False
 
