@@ -1,14 +1,20 @@
 from serial import Serial, SerialException
 from model.sensors import Sensor
+from PyQt5.QtCore import pyqtSignal, QObject
 import logging
 
 logger = logging.getLogger("Dyno."+__name__)
 
-class dcSource(Sensor):
-    port = ''
+class dcSource(QObject):
+    tx = pyqtSignal(str)
+    rxbuf = ''
     def __init__(self, port):
         self.port = port
-        super(dcSource,self).__init__(port)
+        super(dcSource,self).__init__()
+        self.serial = Sensor(port)
+        self.tx.connect(self.serial.send)
+        self.serial.rx.connect(self.recvdata)
+        
         logger.info("DC init in %s",self.port)
         self.putdata("SYST:ETR")
         logger.debug("%s :: %s",self.port,self.getdata())
@@ -20,7 +26,18 @@ class dcSource(Sensor):
             return True
         else:
             return False
-    
+
+    def putdata(self,data):
+        self.tx.emit(data)
+
+    def recvdata(self,data):
+        self.rxbuf = data
+
+    def getdata(self,data=None):
+        if data is not None:
+            self.putdata(data)
+        return self.rxbuf
+
     def turnON(self):
         logger.info("%s :: TurnON",self.port)
         self.putdata("OUTP 1")
@@ -59,30 +76,52 @@ class dcSource(Sensor):
         self.close()
 
 if __name__ == "__main__":
+    from PyQt5.QtWidgets import *
+    import sys
     import model.devices as devices
 
     logging.basicConfig(format= '%(asctime)s : %(levelname)s : %(name)s : %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     log = logging.getLogger('Dyno.model.sensor')
     log.setLevel(logging.DEBUG)
 
-    dc = [dcSource(port) for port in devices.DCS]
+    class MQP(QWidget):
+        # tx = pyqtSignal(str)
+        def __init__(self,parent=None):
+            super(MQP,self).__init__(parent)
 
-    while True:
-        data = input('>> ')
-        if(data.find('d.volt ') != -1):
-            volt = int(data[data.find(' ')+1:])
-            [d.setVoltage(volt) for d in dc]
-        elif (data.find('d.curr ') != -1):
-            curr = int(data[data.find(' ')+1:])
-            [d.setCurrent(curr) for d in dc]
-        elif (data.find('d.on') != -1):
-            [d.turnON() for d in dc]
-        elif (data.find('d.off') != -1):
-            [d.turnOFF() for d in dc]
-        elif (data.find('d.mvolt') != -1):
-            print([d.measVolt() for d in dc])
-        elif (data.find('d.mcurr') != -1):
-            print([d.measCurr() for d in dc])
-        elif(data == 'close'):
-            [d.close() for d in dc]
-            break
+            self.dc = [dcSource(port) for port in devices.DCS]
+            self.setWindowTitle("TESTING")
+            self.setFixedSize(200,100)
+
+            l = QVBoxLayout(self)
+
+            self.txt = QLineEdit(self)
+            self.on = QPushButton(self)
+            self.off = QPushButton(self)
+            l.addWidget(self.txt)
+            l.addWidget(self.on)
+            l.addWidget(self.off)
+
+            self.on.setText("ON")
+            self.off.setText("OFF")
+            self.on.clicked.connect(self.onm)
+            self.off.clicked.connect(self.offm)
+
+            # [self.tx.connect(dc.send) for dc in self.dcs]
+            # [dc.rx.connect(self.recvdata) for dc in self.dcs]
+            # self.s.rx.connect(self.recvdata)
+
+        def recvdata(self, data):
+            self.lab.setText(data)
+
+        def onm(self):
+            [d.turnON() for d in self.dc]
+
+        def offm(self):
+            [d.turnOFF() for d in self.dc]
+
+
+    app = QApplication(sys.argv)
+    w = MQP()
+    w.show()
+    sys.exit(app.exec_())
