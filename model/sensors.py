@@ -7,12 +7,10 @@ logger = logging.getLogger('Dyno.'+__name__)
 
 class Sensor(QThread):
     def __init__(self, port= None):
-        self.serial = None
         try:
-            self.serial = Serial(baudrate=9600, timeout=2)
-            self.serial.port = port
+            self.serial = Serial(port,baudrate=9600, timeout=2)
         except:
-            pass
+            self.serial = None
 
     def checkcomm(self):
         pass

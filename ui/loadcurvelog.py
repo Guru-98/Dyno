@@ -5,13 +5,28 @@ from model.vfd import vfd
 from model.oscilloscope import oscilloscope
 import model.devices as devices
 
+s2i = lambda x: int(x) if x else 0
+s2f = lambda x: float(x) if x else 0
+
+f2s = lambda x: int(('%0.2f'%(x)).replace('.',''))
+f2t = lambda x: int(('%0.1f'%(x)).replace('.',''))
+
 class dashLoadCurveLog(QtWidgets.QWidget):
     def __init__(self,parent=None):
         self.dataRowsNo = 1
+        self.set = False
+        self.control = 'N'
+        self.dir = 0
         super(dashLoadCurveLog,self).__init__(parent)
 
         self.container = QtWidgets.QVBoxLayout(self)
         self.container.setContentsMargins(0, 0, 0, 0)
+
+        self.static_data = QtWidgets.QGroupBox(self)
+        self.static_data_layout = QtWidgets.QVBoxLayout()
+        self.static_data_layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        self.static_data_layout.setSpacing(2)
+        self.static_data.setLayout(self.static_data_layout)
 
         self.motor_data = QtWidgets.QGroupBox(self)
         self.motor_data.setTitle("Motor Parameters")
@@ -88,6 +103,7 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.control_container.setLayout(self.control_container_layout)
         self.controlT = QtWidgets.QRadioButton(self)
         self.controlT.setText("Torque")
+        self.controlT.checkStateSet
         self.controlN = QtWidgets.QRadioButton(self)
         self.controlN.setText("Speed")
         self.controlN.setChecked(True)
@@ -106,13 +122,22 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.directionCW.setText("Clockwise")
         self.directionCCW = QtWidgets.QRadioButton(self)
         self.directionCCW.setText("Anti-Clockwise")
-        # self.directionCCW.setChecked(True)
+        self.directionCCW.setChecked(True)
         self.direction_container_layout.addWidget(self.directionCW  ,alignment=QtCore.Qt.AlignLeft)
         self.direction_container_layout.addWidget(self.directionCCW ,alignment=QtCore.Qt.AlignLeft)
         self.vfd_data_layout.addWidget(self.direction_container)
 
-        self.container.addWidget(self.motor_data,0)
-        self.container.addWidget(self.vfd_data,0)
+        self.static_data_layout.addWidget(self.motor_data,0)
+        self.static_data_layout.addWidget(self.vfd_data,0)
+
+        self.static_data.setDisabled(self.set)
+        self.container.addWidget(self.static_data,0)
+
+        self.set_btn = QtWidgets.QPushButton(self)
+        self.set_btn.setText("Set")
+        self.set_btn.clicked.connect(self.setStaticParams)
+        self.container.addWidget(self.set_btn,alignment=QtCore.Qt.AlignRight)
+
         
         #===========================================================#
 
@@ -120,10 +145,13 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.container.addWidget(spacer,alignment=QtCore.Qt.AlignHCenter)
         self.container.addSpacerItem(QtWidgets.QSpacerItem(1,30,QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.Maximum))
 
+        self.dynamic_data = QtWidgets.QGroupBox(self)
+        self.dynamic_data_layout = QtWidgets.QVBoxLayout()
+        self.dynamic_data_layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        self.dynamic_data_layout.setSpacing(2)
+        self.dynamic_data.setLayout(self.dynamic_data_layout)
+
         self.layout = QtWidgets.QGridLayout()
-        # self.layout.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
-        # self.layout.setStr(QtWidgets.QLayout.SetMaximumSize)
-        # self.layout.setAlignment(QtCore.Qt.AlignCenter)
         self.layout.setColumnStretch(0,2)
         self.layout.setColumnStretch(1,4)
         self.layout.setColumnStretch(2,4)
@@ -137,14 +165,13 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.layout.setColumnStretch(10,4)
         self.layout.setColumnStretch(11,3)
         self.layout.setColumnStretch(12,3)
-        self.container.addLayout(self.layout,0)
+        self.dynamic_data_layout.addLayout(self.layout,0)
 
         self.loadHeader()
         self.dataTable = QtWidgets.QVBoxLayout()
         self.dataTable.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
         self.dataTable.setAlignment(QtCore.Qt.AlignCenter)
-        # self.layout.addLayout(self.dataTable,2,0,1,12,alignment=QtCore.Qt.AlignHCenter)
-        self.container.addLayout(self.dataTable,0)
+        self.dynamic_data_layout.addLayout(self.dataTable,0)
 
         actions = QtWidgets.QHBoxLayout()
         self.addRowbtn = QtWidgets.QPushButton(self)
@@ -157,10 +184,13 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         self.runAllbtn.clicked.connect(self.runAll)
         actions.addWidget(self.runAllbtn,alignment=QtCore.Qt.AlignHCenter)
 
-        self.container.addSpacerItem(QtWidgets.QSpacerItem(1,1,QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.MinimumExpanding))
-        self.container.addLayout(actions,0)
+        self.dynamic_data_layout.addSpacerItem(QtWidgets.QSpacerItem(1,1,QtWidgets.QSizePolicy.MinimumExpanding,QtWidgets.QSizePolicy.MinimumExpanding))
+        self.dynamic_data_layout.addLayout(actions,0)
 
         [self.addRowbtn.click() for _ in range(4)]
+
+        self.dynamic_data.setDisabled(not self.set)
+        self.container.addWidget(self.dynamic_data)
 
         self.dcS = [dcSource(port) for port in devices.DCS]
         self.vfd = vfd(devices.VFD)
@@ -227,6 +257,35 @@ class dashLoadCurveLog(QtWidgets.QWidget):
         del_l.setText("Del")
         self.layout.addWidget(del_l,1,12,alignment=QtCore.Qt.AlignHCenter)
 
+    def setStaticParams(self):
+        self.set ^= True
+        self.static_data.setDisabled(self.set)
+        self.dynamic_data.setDisabled(not self.set)
+
+        if self.set:
+            self.dir = 0 if self.directionCW.isChecked() else 1
+
+            if self.controlT.isChecked():
+                self.control = 'T'
+                maxT = s2i(self.motorT.text())
+                maxT = f2t(maxT)
+                self.vfd.setTorq(maxT)
+            else:
+                self.control = 'N'
+                maxN = s2i(self.motorN.text()) /30
+                maxN = f2t(maxN)
+                self.vfd.setSpeed(maxN)
+
+            volt = s2i(self.motorV.text())
+            curr = s2i(self.motorI.text())
+
+            for dc in self.dcS:
+                dc.setVoltage(volt)
+                dc.setCurrent(curr//5)
+        else:
+            [dc.turnOFF() for dc in self.dcS]
+            self.vfd.stop()
+        
     def addLoadRow(self):
         if self.dataRowsNo <= 8:
             row = loadRow(self)
@@ -242,15 +301,13 @@ class loadRow(QtWidgets.QWidget):
     def __init__(self,parent=None):
         super(loadRow,self).__init__(parent)
         self.parent = parent
-        # self.container = QtWidgets.QGroupBox(parent)
-        # self.container.setStyleSheet("background:black;")
         self.layout = QtWidgets.QHBoxLayout(self)
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
         self.layout.setAlignment(QtCore.Qt.AlignCenter)
-        # self.container.setLayout(self.layout)
 
         self.load      = QtWidgets.QLineEdit(self)
         self.load.setAlignment(QtCore.Qt.AlignHCenter)
+        self.load.textEdited.connect(self.updateLoad)
         self.loadtext  = QtWidgets.QLabel(self)
         # self.loadtext.setAlignment(QtCore.Qt.AlignHCenter)
         self.loadtext.setText('0000.00')
@@ -301,36 +358,34 @@ class loadRow(QtWidgets.QWidget):
         if self.running == False:
             self.running = True
             self.runbtn.setStyleSheet("background: green")
-        
-            s2i = lambda x: int(x) if x else 0
-            s2f = lambda x: float(x) if x else 0
 
-            f2s = lambda x: int(('%0.2f'%(x)).replace('.',''))
-            f2t = lambda x: int(('%0.1f'%(x)).replace('.',''))
+            if self.parent.control == 'T':
+                load = s2i(self.parent.motorT.text()) * s2f(self.load.text()) / 100
+                load = f2t(load)
+                self.parent.vfd.setTorq(load)
+            else:
+                load = s2i(self.parent.motorN.text()) / 30 * s2f(self.load.text()) / 100
+                load = f2s(load)
+                self.parent.vfd.setSpeed(load)
             
-            maxT = s2i(self.parent.motorT.text())
-            maxT = f2t(maxT)
-            load = s2i(self.parent.motorN.text()) / 30 * s2f(self.load.text()) / 100
-            load = f2s(load)
-
-            volt = s2i(self.parent.motorV.text())
-            curr = s2i(self.parent.motorI.text())
-            
-            for dc in self.parent.dcS:
-                dc.setVoltage(volt)
-                dc.setCurrent(curr//5)
-                dc.turnON()
-            
-            self.parent.vfd.setTorq(maxT)
-            self.parent.vfd.setSpeed(load)
-            self.parent.vfd.run(1)
+            [dc.turnON() for dc in self.parent.dcS]
+            self.parent.vfd.run(self.parent.dir)
         else:
             self.running = False
             self.runbtn.setStyleSheet("background: none")
-            for dc in self.parent.dcS:
-                dc.turnOFF()
-            
+            [dc.turnOFF() for dc in self.parent.dcS]
             self.parent.vfd.stop()
+
+    def updateLoad(self):
+        if self.parent.control == 'T':
+            print(self.parent.motorT.text())
+            load = s2i(self.parent.motorT.text()) * s2f(self.load.text()) / 100
+            self.loadtext.setText('%8.2f'%(load))
+        else:
+            print(self.parent.motorN.text())
+            load = s2i(self.parent.motorN.text()) * s2f(self.load.text()) / 100
+            self.loadtext.setText('%8.2f'%(load))
+
     def delRow(self):
         self.parent.dataRowsNo -= 1
         self.parent.addRowbtn.setEnabled(True)
