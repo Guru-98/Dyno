@@ -282,6 +282,17 @@ class dashLoadCurveLog(QtWidgets.QWidget):
             for dc in self.dcS:
                 dc.setVoltage(volt)
                 dc.setCurrent(curr//5)
+
+            ## Setup OSC Measurements ##
+            self.osc.measure('rms',1,1)
+            self.osc.measure('rms',2,2)
+            self.osc.measure('rms',3,3)
+            self.osc.measure('rms',4,4)
+            self.osc.measure('rms',5,5)
+            self.osc.measure('rms',6,6)
+
+            self.osc.start()
+
         else:
             [dc.turnOFF() for dc in self.dcS]
             self.vfd.stop()
@@ -367,9 +378,28 @@ class loadRow(QtWidgets.QWidget):
                 load = s2i(self.parent.motorN.text()) / 30 * s2f(self.load.text()) / 100
                 load = f2s(load)
                 self.parent.vfd.setSpeed(load)
-            
+
             [dc.turnON() for dc in self.parent.dcS]
             self.parent.vfd.run(self.parent.dir)
+
+            ## TODO: Need this in a seprate Thread ##
+            while self.running:
+                con_volt = [dc.measVolt() for dc in self.parent.dcS]
+                self.cont_v_ip.setText('%6.2f'%(sum(con_volt)/5))
+
+                uv_volt = self.parent.osc.getMeasurement(1)
+                vw_volt = self.parent.osc.getMeasurement(2)
+                wv_volt = self.parent.osc.getMeasurement(3)
+                self.cont_v_op.setText('%6.2f'%((uv_volt+vw_volt+wv_volt)/3))
+
+                con_curr = [dc.measCurr() for dc in self.parent.dcS]
+                self.cont_i_ip.setText('%6.2f'%(sum(con_curr)))
+
+                u_curr = self.parent.osc.getMeasurement(4)
+                v_curr = self.parent.osc.getMeasurement(5)
+                w_curr = self.parent.osc.getMeasurement(6)
+                self.cont_v_op.setText('%6.2f'%(u_curr+v_curr+w_curr))
+
         else:
             self.running = False
             self.runbtn.setStyleSheet("background: none")
@@ -378,11 +408,9 @@ class loadRow(QtWidgets.QWidget):
 
     def updateLoad(self):
         if self.parent.control == 'T':
-            print(self.parent.motorT.text())
             load = s2i(self.parent.motorT.text()) * s2f(self.load.text()) / 100
             self.loadtext.setText('%8.2f'%(load))
         else:
-            print(self.parent.motorN.text())
             load = s2i(self.parent.motorN.text()) * s2f(self.load.text()) / 100
             self.loadtext.setText('%8.2f'%(load))
 
